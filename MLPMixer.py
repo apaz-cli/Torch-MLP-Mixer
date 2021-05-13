@@ -32,27 +32,26 @@ class MLPMixer(torch.nn.Module):
                              lin_init_fn=lin_init_fn)
                        for _ in range(self.num_mixers)]
 
-        self.phln = torch.nn.LayerNorm(60)
+        self.phln = torch.nn.LayerNorm(60, elementwise_affine=False)
 
     def forward(self, x):
-        print(f'Shape of initial image stack: {x.shape}')
+        #print(f'Shape of initial image stack: {x.shape}')
         x = self.to_patches(x)
-        print(f'Shape after patching:         {x.shape}')
+        #print(f'Shape after patching:         {x.shape}')
         x = self.ppfc(x)
-        print(f'Shape after per-patch FC:     {x.shape}')
+        #print(f'Shape after per-patch FC:     {x.shape}')
         for m in self.mixers:
             x = m(x)
-        print(f'Shape after mixers:           {x.shape}')
+        #print(f'Shape after mixers:           {x.shape}')
         x = torch.mean(x, dim=2)
-        print(f'Shape after average pooling:  {x.shape}')
-        #x = torch.flatten(x, start_dim=1, end_dim=2)
-        #print(f'Shape after flatten:          {x.shape}')
+        #print(f'Shape after average pooling:  {x.shape}')
         x = self.phln(x)
+        #print(f'Shape after layernorm:        {x.shape}')
         return x
 
 
 def main():
-    print("MLP-Mixer Example")
+    #print("MLP-Mixer Example")
 
     torch.set_num_threads(8)
 
