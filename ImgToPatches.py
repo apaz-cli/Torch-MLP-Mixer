@@ -2,10 +2,16 @@ import torch
 import einops
 
 # Image input shape:  [batch_size, channels, width, height]
-# Patch output shape: [batch_size, num_patches, channels, patch_width, patch_height]
+# Patch output shape: [batch_size, channels, patch_pixels]
 # Where the image width and height are divisible by the patch width and height respectively.
+
+# Note that in the output, patches are stacked with/as channels. The original
+# MLP-Mixer paper implements subimage segmentation as convolutions, which
+# naturally produces the same result.
+
+
 class ImgToPatches(torch.nn.Module):
-    def __init__(self, width, height, patch_width, patch_height):
+    def __init__(self, num_channels, width, height, patch_width, patch_height):
         super(ImgToPatches, self).__init__()
 
         if (width % patch_width) != 0:
@@ -13,21 +19,14 @@ class ImgToPatches(torch.nn.Module):
         if (height % patch_height) != 0:
             raise ValueError('Image height must be divisible by patch height.')
 
+        self._num_patch_channels = (
+            width//patch_width)*(height//patch_height) * num_channels
+
         self.patch_width = patch_width
         self.patch_height = patch_height
 
     def forward(self, img):
-        img = img.unfold(2, self.patch_width, self.patch_width).unfold(3, self.patch_height, self.patch_height)
-        return einops.rearrange(img, 'b c xp yp x y -> b (xp yp) c x y')
-        
-
-# Create an example image batch tensor of the correct shape.
-# Let's say a batch of 64 256x320 RGB images.
-img = torch.arange(64*3*256*320).reshape(64, 3, 256, 320)
-print(img.shape)
-
-# Extract 20 64x64 patches
-patchsplit = ImgToPatches(256, 320, 64, 64)
-#patchsplit = torch.jit.trace(patchsplit, img)
-patches = patchsplit(img)
-print(patches.shape)
+        # Extract image patches across width and height
+        img = img.unfold(2, self.patch_width, self.patch_width).unfold(
+            3, self.patch_height, self.patch_height)
+        return einops.rearrange(img, 'b c x y w h -> b (x y c) (w h)')
