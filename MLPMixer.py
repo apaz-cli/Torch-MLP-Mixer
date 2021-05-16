@@ -71,7 +71,8 @@ def main():
                      img_width=img_width,
                      img_height=img_height,
                      patch_width=patch_width,
-                     patch_height=patch_height)
+                     patch_height=patch_height,
+                     lin_init_fn=torch.nn.init.kaiming_normal_)
 
     # Feed forward into model
     model(img)
