@@ -27,6 +27,6 @@ class ImgToPatches(torch.nn.Module):
 
     def forward(self, img):
         # Extract image patches across width and height
-        img = img.unfold(2, self.patch_width, self.patch_width).unfold(
-            3, self.patch_height, self.patch_height)
+        img = img.unfold(2, self.patch_width, self.patch_width)
+        img = img.unfold(3, self.patch_height, self.patch_height)
         return einops.rearrange(img, 'b c x y w h -> b (c x y) (w h)')
