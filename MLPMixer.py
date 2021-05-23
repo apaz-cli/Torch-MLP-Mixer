@@ -4,7 +4,7 @@ from Mixer import Mixer
 
 
 class MLPMixer(torch.nn.Module):
-    def __init__(self, num_mixers: int, channels: int, img_width: int, img_height: int, patch_width: int, patch_height: int, lin_init_fn: object=None):
+    def __init__(self, num_mixers: int, channels: int, img_width: int, img_height: int, patch_width: int, patch_height: int, lin_init_fn: object = None):
         super(MLPMixer, self).__init__()
 
         if (int(num_mixers) < 0):
@@ -26,13 +26,15 @@ class MLPMixer(torch.nn.Module):
         flat_patch_dim = patch_width*patch_height
         self.ppfc = torch.nn.Linear(flat_patch_dim, flat_patch_dim)
 
-        self.mixers = [Mixer(self.to_patches._num_patch_channels,
-                             patch_width,
-                             patch_height,
-                             lin_init_fn=lin_init_fn)
-                       for _ in range(self.num_mixers)]
+        self.mixers = torch.nn.ModuleList(
+            [Mixer(self.to_patches._num_patch_channels,
+                   patch_width,
+                   patch_height,
+                   lin_init_fn=lin_init_fn)
+             for _ in range(self.num_mixers)])
 
-        self.phln = torch.nn.LayerNorm(self.to_patches._num_patch_channels, elementwise_affine=False)
+        self.phln = torch.nn.LayerNorm(
+            self.to_patches._num_patch_channels, elementwise_affine=False)
 
     def forward(self, x: torch.Tensor):
         x = self.to_patches(x)
@@ -68,14 +70,10 @@ def main():
                      patch_height=patch_height,
                      lin_init_fn=torch.nn.init.kaiming_normal_)
 
-    
-
     # Feed forward into model
     model(img)
 
     #model = torch.jit.trace(model, img)
-
-    
 
 
 if __name__ == "__main__":
