@@ -4,7 +4,7 @@ from Mixer import Mixer
 
 
 class MLPMixer(torch.nn.Module):
-    def __init__(self, num_mixers, channels, img_width, img_height, patch_width, patch_height, lin_init_fn=None):
+    def __init__(self, num_mixers: int, channels: int, img_width: int, img_height: int, patch_width: int, patch_height: int, lin_init_fn: object=None):
         super(MLPMixer, self).__init__()
 
         if (int(num_mixers) < 0):
@@ -34,19 +34,13 @@ class MLPMixer(torch.nn.Module):
 
         self.phln = torch.nn.LayerNorm(self.to_patches._num_patch_channels, elementwise_affine=False)
 
-    def forward(self, x):
-        #print(f'Shape of initial image stack: {x.shape}')
+    def forward(self, x: torch.Tensor):
         x = self.to_patches(x)
-        #print(f'Shape after patching:         {x.shape}')
         x = self.ppfc(x)
-        #print(f'Shape after per-patch FC:     {x.shape}')
         for m in self.mixers:
             x = m(x)
-        #print(f'Shape after mixers:           {x.shape}')
         x = torch.mean(x, dim=2)
-        #print(f'Shape after average pooling:  {x.shape}')
         x = self.phln(x)
-        #print(f'Shape after layernorm:        {x.shape}')
         return x
 
 
@@ -74,8 +68,14 @@ def main():
                      patch_height=patch_height,
                      lin_init_fn=torch.nn.init.kaiming_normal_)
 
+    
+
     # Feed forward into model
     model(img)
+
+    #model = torch.jit.trace(model, img)
+
+    
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ import einops
 
 
 class ImgToPatches(torch.nn.Module):
-    def __init__(self, num_channels, width, height, patch_width, patch_height):
+    def __init__(self, num_channels: int, width: int, height: int, patch_width: int, patch_height: int):
         super(ImgToPatches, self).__init__()
 
         if (width % patch_width) != 0:

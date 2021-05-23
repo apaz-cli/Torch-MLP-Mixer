@@ -3,7 +3,7 @@ import torch
 
 
 class MLP(torch.nn.Module):
-    def __init__(self, dim, lin_init_fn=None):
+    def __init__(self, dim: int, lin_init_fn: object = None):
         super(MLP, self).__init__()
 
         # Declare and initialize
@@ -15,7 +15,7 @@ class MLP(torch.nn.Module):
             lin_init_fn(self.lin1.weight.data)
             lin_init_fn(self.lin2.weight.data)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x = self.lin1(x)
         x = self.gelu(x)
         x = self.lin2(x)
@@ -38,12 +38,12 @@ class Mixer(torch.nn.Module):
 
     # Input of size:
     # [batch_size, channels, pixels]
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x = self.token_mixing(x)
         x = self.channel_mixing(x)
         return x
 
-    def token_mixing(self, x):
+    def token_mixing(self, x: torch.Tensor):
         prev_x = x  # skip connection
         x = self.ln1(x)
         x = torch.transpose(x, 1, 2)  # channels and pixels
@@ -51,7 +51,7 @@ class Mixer(torch.nn.Module):
         x = torch.transpose(x, 1, 2)
         return x + prev_x
 
-    def channel_mixing(self, x):
+    def channel_mixing(self, x: torch.Tensor):
         prev_x = x  # skip connection
         x = self.ln2(x)
         x = self.mlp2(x)
