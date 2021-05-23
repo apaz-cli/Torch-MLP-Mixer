@@ -32,7 +32,7 @@ class MLPMixer(torch.nn.Module):
                              lin_init_fn=lin_init_fn)
                        for _ in range(self.num_mixers)]
 
-        self.phln = torch.nn.LayerNorm(60, elementwise_affine=False)
+        self.phln = torch.nn.LayerNorm(self.to_patches._num_patch_channels, elementwise_affine=False)
 
     def forward(self, x):
         #print(f'Shape of initial image stack: {x.shape}')

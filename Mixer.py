@@ -7,18 +7,19 @@ class MLP(torch.nn.Module):
         super(MLP, self).__init__()
 
         # Declare and initialize
-        lin1 = torch.nn.Linear(dim, dim)
-        gelu = torch.nn.GELU()
-        lin2 = torch.nn.Linear(dim, dim)
+        self.lin1 = torch.nn.Linear(dim, dim)
+        self.gelu = torch.nn.GELU()
+        self.lin2 = torch.nn.Linear(dim, dim)
 
         if lin_init_fn:
-            lin_init_fn(lin1.weight.data)
-            lin_init_fn(lin2.weight.data)
-
-        self.seq = torch.nn.Sequential(lin1, gelu, lin2)
+            lin_init_fn(self.lin1.weight.data)
+            lin_init_fn(self.lin2.weight.data)
 
     def forward(self, x):
-        return self.seq(x)
+        x = self.lin1(x)
+        x = self.gelu(x)
+        x = self.lin2(x)
+        return x
 
 
 class Mixer(torch.nn.Module):
@@ -38,7 +39,9 @@ class Mixer(torch.nn.Module):
     # Input of size:
     # [batch_size, channels, pixels]
     def forward(self, x):
-        return self.channel_mixing(self.token_mixing(x))
+        x = self.token_mixing(x)
+        x = self.channel_mixing(x)
+        return x
 
     def token_mixing(self, x):
         prev_x = x  # skip connection
